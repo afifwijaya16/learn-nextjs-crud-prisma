@@ -1,0 +1,17 @@
+npx create-next-app@latest
+
+ts yes
+eslint yes
+tailwind yes
+src no
+app router yes
+
+npm i daisyui axios
+npm i prisma
+npm i @prisma/client
+
+tutor prisma 
+
+npx prisma init => setup prisma
+npx prisma migrate dev => migrasi data
+npx prisma studio => db prisma http://localhost:5555/
