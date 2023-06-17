@@ -1,22 +1,43 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 import { useState, SyntheticEvent } from "react";
 import type { Category } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-const addNews = ({ category }: { category: Category[] }) => {
-  const router = useRouter();
+type News = {
+  title: string;
+  description: string;
+  id: number;
+  categoryId: number | null;
+};
+
+const UpdateNews = ({
+  news,
+  category,
+}: {
+  news: News;
+  category: Category[];
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState({
-    title: "",
-    description: "",
-    categoryId: "",
+    title: news.title,
+    description: news.description,
+    categoryId: Number(news.categoryId),
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleModal = () => {
-    setIsOpen(!isOpen);
+  const router = useRouter();
+
+  const handleUpdate = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    await axios.patch(`/api/news/${news.id}`, {
+      ...data,
+      categoryId: Number(data.categoryId),
+    });
+    setIsLoading(false);
+    router.refresh();
+    handleModal();
   };
 
   const handleChange = (e: any) => {
@@ -26,32 +47,20 @@ const addNews = ({ category }: { category: Category[] }) => {
     });
   };
 
-  const handleSubmit = async (e: SyntheticEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await axios.post(`/api/news`, {
-      ...data,
-      categoryId: Number(data.categoryId),
-    });
-    setIsLoading(false);
-    setData({
-      title: "",
-      description: "",
-      categoryId: "",
-    });
-    router.refresh();
-    handleModal();
+  const handleModal = () => {
+    setIsOpen(!isOpen);
   };
 
   return (
-    <>
-      <button className="btn btn-sm btn-primary" onClick={() => handleModal()}>
-        Add New
+    <div>
+      <button className="btn btn-info btn-sm" onClick={handleModal}>
+        Edit
       </button>
-      <div className={isOpen ? `modal modal-open` : `modal`}>
+
+      <div className={isOpen ? "modal modal-open" : "modal"}>
         <div className="modal-box">
-          <h3 className="font-bold text-lg"> Add New </h3>
-          <form onSubmit={handleSubmit}>
+          <h3 className="font-bold text-lg">Update {news.title}</h3>
+          <form onSubmit={handleUpdate}>
             <div className="form-control w-full">
               <label className="label font-bold"> Title</label>
               <input
@@ -76,6 +85,7 @@ const addNews = ({ category }: { category: Category[] }) => {
             <div className="form-control w-full">
               <label className="label font-bold"> Category</label>
               <select
+                value={data.categoryId}
                 className="select select-bordered"
                 name="categoryId"
                 defaultValue={"default"}
@@ -95,25 +105,25 @@ const addNews = ({ category }: { category: Category[] }) => {
               <button
                 type="button"
                 className="btn btn-sm"
-                onClick={() => handleModal()}
+                onClick={handleModal}
               >
                 Close
               </button>
               {!isLoading ? (
                 <button type="submit" className="btn btn-sm btn-primary">
-                  Save
+                  Update
                 </button>
               ) : (
-                <button type="button" className="btn loading">
-                  Saving...
+                <button type="button" className="btn btn-sm loading">
+                  Updating...
                 </button>
               )}
             </div>
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default addNews;
+export default UpdateNews;

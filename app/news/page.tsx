@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import Link from "next/link";
 import ModalAdd from "./addNews";
+import ModalDelete from "./deleteNews";
+import ModalUpdate from "./updateNews";
 const prisma = new PrismaClient();
 
 const getNews = async () => {
@@ -48,12 +49,9 @@ const NewsPage = async () => {
               <td>{row.title}</td>
               <td>{row.description}</td>
               <td>{row.category?.name}</td>
-              <td className="text-center">
-                <Link href={`/news/${row.id}`}>
-                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    View
-                  </button>
-                </Link>
+              <td className="flex justify-center space-x-1">
+                <ModalUpdate news={row} category={category} />
+                <ModalDelete news={row} />
               </td>
             </tr>
           ))}
